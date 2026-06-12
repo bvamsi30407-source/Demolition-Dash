@@ -6,16 +6,12 @@ interface DashboardProps {
   gameState: GameState;
   isMuted: boolean;
   onToggleMute: () => void;
-  onPressSteer: (dir: number) => void;
-  onSetBrake: (active: boolean) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   gameState,
   isMuted,
   onToggleMute,
-  onPressSteer,
-  onSetBrake,
 }) => {
   const {
     distance,
@@ -185,43 +181,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           )}
-        </div>
-
-        {/* MOBILE CONTROLLERS TOUCH REGION (Reveals fully only under touch-gestured platforms, always supports testing click interactions) */}
-        <div className="flex justify-between items-center w-full gap-4 md:hidden pointer-events-auto py-2">
-          {/* Steering Left / Right Side Pads */}
-          <div className="flex gap-2">
-            <button
-              onTouchStart={() => onPressSteer(-1)}
-              onTouchEnd={() => onPressSteer(0)}
-              onMouseDown={() => onPressSteer(-1)}
-              onMouseUp={() => onPressSteer(0)}
-              className="bg-stone-800/90 active:bg-stone-700/95 border-2 border-stone-600 select-none w-16 h-14 rounded-xl flex items-center justify-center text-stone-300 font-bold active:scale-95 transition-transform"
-            >
-              ◀ STEER
-            </button>
-            <button
-              onTouchStart={() => onPressSteer(1)}
-              onTouchEnd={() => onPressSteer(0)}
-              onMouseDown={() => onPressSteer(1)}
-              onMouseUp={() => onPressSteer(0)}
-              className="bg-stone-800/90 active:bg-stone-700/95 border-2 border-stone-600 select-none w-16 h-14 rounded-xl flex items-center justify-center text-stone-300 font-bold active:scale-95 transition-transform"
-            >
-              STEER ▶
-            </button>
-          </div>
-
-          {/* Gigantic Brake lever Pedal */}
-          <button
-            onTouchStart={() => onSetBrake(true)}
-            onTouchEnd={() => onSetBrake(false)}
-            onMouseDown={() => onSetBrake(true)}
-            onMouseUp={() => onSetBrake(false)}
-            className="flex-1 max-w-[200px] bg-red-900/95 active:bg-red-800/95 border-2 border-red-600/80 hover:bg-red-800 select-none h-14 rounded-xl flex items-center justify-center text-red-100 font-bold tracking-wider active:scale-95 transition-transform font-mono"
-            title="Squeeze Brakes to slow/cool"
-          >
-            💨 PRESS BRAKES (VENT)
-          </button>
         </div>
       </div>
     </div>

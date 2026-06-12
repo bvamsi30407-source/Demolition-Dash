@@ -47,10 +47,6 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   
-  // Mobile steering target overrides (-1 for left, 1 for right, 0 for center)
-  const [mobileSteer, setMobileSteer] = useState<number>(0);
-  const [mobileBrake, setMobileBrake] = useState<boolean>(false);
-
   // Load high scores on mount
   useEffect(() => {
     try {
@@ -88,8 +84,6 @@ export default function App() {
       highDistance: prev.highDistance,
     }));
     setIsPlaying(true);
-    setMobileSteer(0);
-    setMobileBrake(false);
   };
 
   const handleGameOver = (reason: 'OVERHEAT' | 'CRASH', score: number, dist: number) => {
@@ -140,8 +134,6 @@ export default function App() {
               setGameState={setGameState}
               isPlaying={isPlaying && !gameState.isPaused && !gameState.isGameOver}
               onGameOver={handleGameOver}
-              inputSteer={mobileSteer}
-              inputBrake={mobileBrake}
             />
 
             {/* Dashboard HUD overlay */}
@@ -149,8 +141,6 @@ export default function App() {
               gameState={gameState}
               isMuted={isMuted}
               onToggleMute={handleToggleMute}
-              onPressSteer={(dir) => setMobileSteer(dir)}
-              onSetBrake={(active) => setMobileBrake(active)}
             />
           </div>
         ) : (

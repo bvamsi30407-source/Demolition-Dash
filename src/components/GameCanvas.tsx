@@ -7,8 +7,6 @@ interface GameCanvasProps {
   setGameState: React.Dispatch<React.SetStateAction<GameState>>;
   isPlaying: boolean;
   onGameOver: (reason: 'OVERHEAT' | 'CRASH', finalScore: number, finalDist: number) => void;
-  inputSteer: number; // -1 for dev steering left, 1 for right, 0 for neutral
-  inputBrake: boolean; // true if braking active from UI
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -16,8 +14,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   setGameState,
   isPlaying,
   onGameOver,
-  inputSteer,
-  inputBrake,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -25,8 +21,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Keep game values in refs to avoid React re-renders in high-speed 60FPS loop
   const stateRef = useRef<GameState>(gameState);
   const isPlayingRef = useRef<boolean>(isPlaying);
-  const inputSteerRef = useRef<number>(inputSteer);
-  const inputBrakeRef = useRef<boolean>(inputBrake);
+  const inputSteerRef = useRef<number>(0);
+  const inputBrakeRef = useRef<boolean>(false);
 
   // Entities state
   const obstaclesRef = useRef<Obstacle[]>([]);
@@ -67,13 +63,64 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   }, [isPlaying]);
 
+  // Mobile full-screen touch control listeners
   useEffect(() => {
-    inputSteerRef.current = inputSteer;
-  }, [inputSteer]);
+    const container = containerRef.current;
+    if (!container) return;
 
-  useEffect(() => {
-    inputBrakeRef.current = inputBrake;
-  }, [inputBrake]);
+    const handleTouch = (e: TouchEvent) => {
+      // Prevent typical mobile browser behaviors (scrolling, pinch-to-zoom) inside the game area
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
+      // Quick audio initialization gesture
+      soundEngine.init();
+
+      if (!isPlayingRef.current || stateRef.current.isGameOver || stateRef.current.isPaused) {
+        inputSteerRef.current = 0;
+        inputBrakeRef.current = false;
+        return;
+      }
+
+      const touchCount = e.touches.length;
+
+      if (touchCount >= 2) {
+        // Multi-touch: Activate Emergency Brakes (Vent Heat)
+        inputBrakeRef.current = true;
+        inputSteerRef.current = 0;
+      } else if (touchCount === 1) {
+        // Single touch: division of width for steering left/right
+        inputBrakeRef.current = false;
+        
+        const rect = container.getBoundingClientRect();
+        const touchX = e.touches[0].clientX - rect.left;
+        const halfWidth = rect.width / 2;
+
+        if (touchX < halfWidth) {
+          inputSteerRef.current = -1; // steer left
+        } else {
+          inputSteerRef.current = 1; // steer right
+        }
+      } else {
+        // No active touches
+        inputBrakeRef.current = false;
+        inputSteerRef.current = 0;
+      }
+    };
+
+    container.addEventListener('touchstart', handleTouch, { passive: false });
+    container.addEventListener('touchmove', handleTouch, { passive: false });
+    container.addEventListener('touchend', handleTouch, { passive: false });
+    container.addEventListener('touchcancel', handleTouch, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouch);
+      container.removeEventListener('touchmove', handleTouch);
+      container.removeEventListener('touchend', handleTouch);
+      container.removeEventListener('touchcancel', handleTouch);
+    };
+  }, []);
 
   // Handle high score updates
   const updateScoresRef = useRef<(scrapRate: number, distDelta: number, mult: number) => void>(() => {});
