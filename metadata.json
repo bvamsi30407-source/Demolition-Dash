@@ -1,0 +1,6 @@
+{
+  "name": "Scrap Metal: Demolition Dash",
+  "description": "A high-octane post-apocalyptic diesel-punk driving game where you ram obstacles, manage overheat, and speed down a dusty wasteland highway.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
